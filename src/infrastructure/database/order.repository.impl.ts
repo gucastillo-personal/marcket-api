@@ -14,7 +14,7 @@ export class OrderRepositoryImpl implements OrderRepository {
   async findByUserId(userId: number): Promise<Order[]> {
     return this.orderRepo.find({
       where: { userid: userId },
-      // relations: ['instrument'],
+      relations: ['instrument'],
       order: { datetime: 'DESC' },
     });
   }

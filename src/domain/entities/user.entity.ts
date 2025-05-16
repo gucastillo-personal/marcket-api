@@ -3,15 +3,15 @@ import { Order } from './order.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn() // INTEGER autoincremental
+  @PrimaryGeneratedColumn() 
   id?: number;
 
   @Column({ length: 255 })
   email?: string;
 
-  @Column({ name: 'accountnumber', length: 20 }) // usa el nombre real en la DB
+  @Column({ name: 'accountnumber', length: 20 }) 
   accountNumber?: string;
 
-  // @OneToMany(() => Order, (order) => order.user)
-  // orders: Order[];
+  @OneToMany(() => Order, (order) => order.user)
+  orders?: Order[];
 }

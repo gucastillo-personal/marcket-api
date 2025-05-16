@@ -5,7 +5,7 @@ import { MarketData } from './marketdata.entity';
 @Entity('instruments')
 export class Instrument {
   @PrimaryGeneratedColumn() 
-  id?: number;               
+  id: number | undefined;               
 
   @Column({ length: 10 })
   ticker?: string;
@@ -16,8 +16,8 @@ export class Instrument {
   @Column({ length: 10 })
   type?: string;
 
-  // @OneToMany(() => Order, (order) => order.instrument)
-  // orders: Order[];
+  @OneToMany(() => Order, (order) => order.instrument)
+  orders?: Order[];
 
   // @OneToMany(() => MarketData, (md) => md.instrument)
   // marketdata: MarketData[];
