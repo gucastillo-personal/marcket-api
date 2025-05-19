@@ -18,4 +18,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   ssl: {
     rejectUnauthorized: false,
   },
+  logging: true,
 };

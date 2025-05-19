@@ -8,17 +8,21 @@ import { GetOrdersByUserUseCase } from './application/use-cases/get-orders-by-us
 
 import { SummaryCommand } from './domain/bussines/summary.command';
 import { GetSummaryByUserUseCase } from './application/use-cases/get-summary-by-user.usecase';
-import { UserRepositoryImpl } from './infrastructure/database/user.repository.impl';
+import { UserRepositoryImpl } from './infrastructure/repositories/user.repository.impl';
 import { PortfolioController } from './infrastructure/controllers/porfolio.controller';
-import { MarketDataRepositoryImpl } from './infrastructure/database/marketdata.repository.impl';
-import { OrderRepositoryImpl } from './infrastructure/database/order.repository.impl';
+import { MarketDataRepositoryImpl } from './infrastructure/repositories/marketdata.repository.impl';
+import { OrderRepositoryImpl } from './infrastructure/repositories/order.repository.impl';
+import { InstrumentRepositoryImpl } from './infrastructure/repositories/instrument.repository.impl';
+import { InstrumentController } from './infrastructure/controllers/instrument.controller';
+import { SearchInstrumentsByTextUseCase } from './application/use-cases/search-instruments-by-text.usecase';
 
 @Module({
   imports: [TypeOrmModule.forRoot(typeOrmConfig), DatabaseModule],
-  controllers: [OrderController,PortfolioController],
+  controllers: [OrderController,PortfolioController, InstrumentController],
   providers: [
     GetOrdersByUserUseCase,
     GetSummaryByUserUseCase,
+    SearchInstrumentsByTextUseCase,
     SummaryCommand,
     {
       provide: 'OrderRepository',
@@ -31,6 +35,9 @@ import { OrderRepositoryImpl } from './infrastructure/database/order.repository.
     {
       provide: 'MarketDataRepository',
       useExisting: MarketDataRepositoryImpl,
+    },{
+      provide: 'InstrumentRepository',
+      useExisting: InstrumentRepositoryImpl,
     }
   ],
 })
