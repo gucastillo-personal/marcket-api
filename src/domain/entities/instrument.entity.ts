@@ -4,6 +4,18 @@ import { MarketData } from './marketdata.entity';
 
 @Entity('instruments')
 export class Instrument {
+  
+  constructor(
+    id: number,
+    ticker: string,
+    name: string,
+    type: string,
+  ) {
+    this.id = id;
+    this.ticker = ticker;
+    this.name = name;
+    this.type = type;
+  }
   @PrimaryGeneratedColumn() 
   id: number | undefined;               
 
@@ -11,7 +23,7 @@ export class Instrument {
   ticker?: string;
 
   @Column({ length: 255 })
-  name?: string;
+  name: string;
 
   @Column({ length: 10 })
   type?: string;
