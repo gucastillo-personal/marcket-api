@@ -8,6 +8,14 @@ export class InstrumentRepositoryImpl implements InstrumentRepository {
     @InjectRepository(Instrument)
     private readonly instrumentRepo: Repository<Instrument>,
   ) {}
+  
+  existsById(id: number): Promise<boolean> {
+    return this.instrumentRepo
+      .createQueryBuilder('instrument')
+      .where('instrument.id = :id', { id })
+      .getCount()
+      .then(count => count > 0);
+  }
 
   async getIntrumentByLikeTiketAndName(textSearch: string): Promise<Instrument[] | null> {
     return this.instrumentRepo

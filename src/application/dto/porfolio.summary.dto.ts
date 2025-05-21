@@ -35,7 +35,7 @@ export class PortfolioSummaryDTO {
     }
 
     setCurrentValueAccount(currentValueAccount: number) {
-        this.currentValueAccount = currentValueAccount;
+        this.currentValueAccount = currentValueAccount + this.totalAvailableToInvest;
     }
 }
 

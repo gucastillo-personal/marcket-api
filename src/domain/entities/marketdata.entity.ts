@@ -33,6 +33,9 @@ export class MarketData {
   @Column({ type: 'date' }) 
   date?: string;
 
+  getCurrentPrice(): number {
+    return Number(this.close) ?? 0;
+  }
   // @ManyToOne(() => Instrument, (instrument) => instrument.marketdata)
   // @JoinColumn({ name: 'instrumentid' }) 
   // instrument: Instrument;

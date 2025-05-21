@@ -4,30 +4,20 @@ import { MarketDataRepository } from "../repositories/market.repository";
 import { Asset } from "../entities/asset.entity";
 import { Instrument } from "../entities/instrument.entity";
 import { MarketData } from "../entities/marketdata.entity";
+import { GetBalanceAvailableToUserCommand } from "./get-balance-available-to-user.command";
 
 @Injectable()
 export class SummaryCommand {
 
     constructor(
         @Inject('MarketDataRepository')
-        private readonly marcketRepo: MarketDataRepository,
+        private readonly marketRepo: MarketDataRepository,
+
+        private readonly getBalaceAvailableToUserCommand: GetBalanceAvailableToUserCommand,
     ) {}
 
     getTotalAvailableToInvest(orders :Order[]): number{
-        const ordersFilled = orders.filter(order => order.status === 'FILLED');
-       
-        const cashInList = ordersFilled.filter(order => order.side === 'CASH_IN');
-        const cashOutList = ordersFilled.filter(order => order.side === 'CASH_OUT');
-        const buyList = ordersFilled.filter(order => order.side === 'BUY');
-        const sellList = ordersFilled.filter(order => order.side === 'SELL');
-
-        const totalValueCashIn = cashInList.reduce((acc, order) => acc + ((order.price ?? 0) * (order.size ?? 0)), 0);
-        const totalValueCashOut = cashOutList.reduce((acc, order) => acc + ((order.price ?? 0) * (order.size ?? 0)), 0);
-        const totalValueBuy = buyList.reduce((acc, order) => acc + ((order.price ?? 0) * (order.size ?? 0)), 0);
-        const totalValueSell = sellList.reduce((acc, order) => acc + ((order.price ?? 0) * (order.size ?? 0)), 0);
-        
-        
-        return  (totalValueCashIn + totalValueSell ) - (totalValueCashOut + totalValueBuy);
+        return this.getBalaceAvailableToUserCommand.getTotalAvailableToInvest(orders);
     }
 
     async getCurrentValueAccount(orders: Order[]): Promise<number> {
@@ -41,14 +31,15 @@ export class SummaryCommand {
             const possession = actualPossessionOfAnInstruments[instrumentId];
             if (possession.total > 0) {
                 const marketData = await this.getCurrentValueInstrument(Number(instrumentId));
-                totalValueAccount += possession.total * (marketData?.close ?? 0);
+                const closePrice = marketData?.getCurrentPrice() ?? 1;
+                totalValueAccount += possession.total * closePrice;
             }
         }
         return totalValueAccount;
     }
     async getCurrentValueInstrument(instrumentId: number): Promise<MarketData | null> {
         // Hacer una cache en memoria para no hacer tantas consultas a la base de datos
-        const marketData = await this.marcketRepo.getCurrentValueIntrument(instrumentId);
+        const marketData = await this.marketRepo.getCurrentValueIntrument(instrumentId);
         return marketData;
     }
 
@@ -63,7 +54,7 @@ export class SummaryCommand {
                 
                 const currentMarketData = await this.getCurrentValueInstrument(Number(instrumentId));
                 const { instrument , total } = possession;
-                const currentPrice = currentMarketData?.close ?? 0;
+                const currentPrice = currentMarketData?.getCurrentPrice() ?? 1;
                 const orders = possession.orders;
                 // Deberia ignorar las ordenes de tipo CASH_IN y CASH_OUT???
                 const oldPrice = orders.filter(order => order.side === 'BUY' || order.side === 'CASH_IN').at(-1)?.price ?? 0;
@@ -87,11 +78,11 @@ export class SummaryCommand {
           const orders = ordersGroupedByInstrument[instrumentId];
       
           const totalBuy = orders
-            .filter(order => order.side === 'BUY' || order.side === 'CASH_IN')
+            .filter(order => order.side === 'BUY')
             .reduce((acc, order) => acc + (order.size ?? 0), 0);
       
           const totalSell = orders
-            .filter(order => order.side === 'SELL' || order.side === 'CASH_OUT')
+            .filter(order => order.side === 'SELL')
             .reduce((acc, order) => acc + (order.size ?? 0), 0);
       
           const instrument = orders[0]?.instrument as Instrument;

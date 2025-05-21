@@ -1,0 +1,1 @@
+export type StatusOrder = 'NEW' | 'FILLED' | 'REJECTED' | 'CANCELED';

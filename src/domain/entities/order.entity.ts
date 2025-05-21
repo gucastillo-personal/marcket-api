@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Instrument } from './instrument.entity';
+import { StatusOrder } from '../types';
 
 @Entity('orders')
 export class Order {
@@ -44,4 +45,13 @@ export class Order {
   @ManyToOne(() => Instrument, (instrument) => instrument.orders)
   @JoinColumn({ name: 'instrumentid' }) 
   instrument?: Instrument;
+
+
+  setStatus(status: StatusOrder) {
+    this.status = status;
+  }
+
+  setPrice(price: number) {
+    this.price = price;
+  }
 }

@@ -15,30 +15,44 @@ import { OrderRepositoryImpl } from './infrastructure/repositories/order.reposit
 import { InstrumentRepositoryImpl } from './infrastructure/repositories/instrument.repository.impl';
 import { InstrumentController } from './infrastructure/controllers/instrument.controller';
 import { SearchInstrumentsByTextUseCase } from './application/use-cases/search-instruments-by-text.usecase';
+import { GetBalanceAvailableToUserCommand } from './domain/bussines/get-balance-available-to-user.command';
+import { UserHasBalanceForPurchaseCommand } from './domain/bussines/user-has-balance-for-purchase.command';
+import { CreateOrderCommand } from './domain/bussines/create-order.command';
+import { CreateOrderUseCase } from './application/use-cases/create-order-in-market.usecase';
 
 @Module({
   imports: [TypeOrmModule.forRoot(typeOrmConfig), DatabaseModule],
-  controllers: [OrderController,PortfolioController, InstrumentController],
+  controllers: [OrderController, PortfolioController, InstrumentController],
   providers: [
     GetOrdersByUserUseCase,
     GetSummaryByUserUseCase,
     SearchInstrumentsByTextUseCase,
+    CreateOrderUseCase,
+
+    // Lógica de negocio
+
+    GetBalanceAvailableToUserCommand,
+    UserHasBalanceForPurchaseCommand,
     SummaryCommand,
+    CreateOrderCommand,
+
+    // Repositorios como tokens
     {
       provide: 'OrderRepository',
       useExisting: OrderRepositoryImpl,
     },
     {
       provide: 'UserRepository',
-      useExisting: UserRepositoryImpl
+      useExisting: UserRepositoryImpl,
     },
     {
       provide: 'MarketDataRepository',
       useExisting: MarketDataRepositoryImpl,
-    },{
+    },
+    {
       provide: 'InstrumentRepository',
       useExisting: InstrumentRepositoryImpl,
-    }
+    },
   ],
 })
 export class AppModule {}
