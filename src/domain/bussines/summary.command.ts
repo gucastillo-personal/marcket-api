@@ -5,6 +5,7 @@ import { Asset } from "../entities/asset.entity";
 import { Instrument } from "../entities/instrument.entity";
 import { MarketData } from "../entities/marketdata.entity";
 import { GetBalanceAvailableToUserCommand } from "./get-balance-available-to-user.command";
+import { GetActualPossessionOfAnInstrumentsCommand } from "./get-actual-possesion.command";
 
 @Injectable()
 export class SummaryCommand {
@@ -14,6 +15,8 @@ export class SummaryCommand {
         private readonly marketRepo: MarketDataRepository,
 
         private readonly getBalaceAvailableToUserCommand: GetBalanceAvailableToUserCommand,
+
+        private readonly getPossessionCommand: GetActualPossessionOfAnInstrumentsCommand,
     ) {}
 
     getTotalAvailableToInvest(orders :Order[]): number{
@@ -24,8 +27,7 @@ export class SummaryCommand {
         const ordersFilled = orders.filter(order => order.status === 'FILLED');
         let totalValueAccount = 0;
 
-        const ordersGroupedByInstrument = this.groupOrdersByInstrument(ordersFilled);
-        const actualPossessionOfAnInstruments = this.getActualPossessionOfAnInstruments(ordersGroupedByInstrument)
+        const actualPossessionOfAnInstruments = this.getPossessionCommand.getActualPossessionOfAnInstruments(ordersFilled);
         
         for (const instrumentId in actualPossessionOfAnInstruments) {
             const possession = actualPossessionOfAnInstruments[instrumentId];
@@ -45,8 +47,7 @@ export class SummaryCommand {
 
     async getAssets(orders: Order[]): Promise<Asset[]> {
         const ordersFilled = orders.filter(order => order.status === 'FILLED');
-        const ordersGroupedByInstrument = this.groupOrdersByInstrument(ordersFilled);
-        const actualPossessionOfAnInstruments = this.getActualPossessionOfAnInstruments(ordersGroupedByInstrument)
+        const actualPossessionOfAnInstruments = this.getPossessionCommand.getActualPossessionOfAnInstruments(ordersFilled);
         const assets: Asset[] = [];
         for (const instrumentId in actualPossessionOfAnInstruments) {
             const possession = actualPossessionOfAnInstruments[instrumentId];
@@ -69,47 +70,5 @@ export class SummaryCommand {
         return assets;
 
     }
-    getActualPossessionOfAnInstruments(
-        ordersGroupedByInstrument: { [key: string]: Order[] }
-      ): { [key: string]: { total: number; instrument: Instrument, orders: Order[] } } {
-        const actualPossession: { [key: string]: { total: number; instrument: Instrument, orders: Order[]} } = {};
-      
-        for (const instrumentId in ordersGroupedByInstrument) {
-          const orders = ordersGroupedByInstrument[instrumentId];
-      
-          const totalBuy = orders
-            .filter(order => order.side === 'BUY')
-            .reduce((acc, order) => acc + (order.size ?? 0), 0);
-      
-          const totalSell = orders
-            .filter(order => order.side === 'SELL')
-            .reduce((acc, order) => acc + (order.size ?? 0), 0);
-      
-          const instrument = orders[0]?.instrument as Instrument;
-      
-          actualPossession[instrumentId] = {
-            total: totalBuy - totalSell,
-            instrument,
-            orders,
-          };
-        }
-      
-        return actualPossession;
-      }
-
-    groupOrdersByInstrument(orders: Order[]) {
-        const ordersGroupedByInstrument: { [key: string]: Order[] } = {};
-
-        for (const order of orders) {
-            const instrumentId = order.instrumentid;
-            if (instrumentId) {
-                if (!ordersGroupedByInstrument[instrumentId]) {
-                    ordersGroupedByInstrument[instrumentId] = [];
-                }
-                ordersGroupedByInstrument[instrumentId].push(order);
-            }
-        }
-
-        return ordersGroupedByInstrument;
-    }
+    
 }

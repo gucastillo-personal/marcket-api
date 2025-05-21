@@ -19,6 +19,7 @@ import { GetBalanceAvailableToUserCommand } from './domain/bussines/get-balance-
 import { UserHasBalanceForPurchaseCommand } from './domain/bussines/user-has-balance-for-purchase.command';
 import { CreateOrderCommand } from './domain/bussines/create-order.command';
 import { CreateOrderUseCase } from './application/use-cases/create-order-in-market.usecase';
+import { GetActualPossessionOfAnInstrumentsCommand } from './domain/bussines/get-actual-possesion.command';
 
 @Module({
   imports: [TypeOrmModule.forRoot(typeOrmConfig), DatabaseModule],
@@ -30,7 +31,7 @@ import { CreateOrderUseCase } from './application/use-cases/create-order-in-mark
     CreateOrderUseCase,
 
     // Lógica de negocio
-
+    GetActualPossessionOfAnInstrumentsCommand,
     GetBalanceAvailableToUserCommand,
     UserHasBalanceForPurchaseCommand,
     SummaryCommand,
