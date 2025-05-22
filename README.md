@@ -106,6 +106,7 @@ src/
    -  En alguna cache en memoria para evitar consultar repetitivas a la base. 
    -  En test de Integracion
 - Se agrego connect-neon.sh para conectarse a la base por consola.
+- Se deja en la [Collention](https://github.com/gucastillo-personal/marcket-api/blob/main/colletion-postman/Marcket%20Api.postman_collection.json)  para pruebas desde postman
      
 
 ## 📄 Licencia
