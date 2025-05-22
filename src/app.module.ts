@@ -20,6 +20,11 @@ import { UserHasBalanceForPurchaseCommand } from './domain/bussines/user-has-bal
 import { CreateOrderCommand } from './domain/bussines/create-order.command';
 import { CreateOrderUseCase } from './application/use-cases/create-order-in-market.usecase';
 import { GetActualPossessionOfAnInstrumentsCommand } from './domain/bussines/get-actual-possesion.command';
+import { OrderValidationContext } from './domain/bussines/validation-strategies/order-validation-context';
+import { CashOutOrderValidationStrategy } from './domain/bussines/validation-strategies/cash-out-order-validation.strategy';
+import { CashInOrderValidationStrategy } from './domain/bussines/validation-strategies/cash-in-order-validation.strategy';
+import { SellOrderValidationStrategy } from './domain/bussines/validation-strategies/sell-order-validation.strategy';
+import { BuyOrderValidationStrategy } from './domain/bussines/validation-strategies/buy-order-validation.strategy';
 
 @Module({
   imports: [TypeOrmModule.forRoot(typeOrmConfig), DatabaseModule],
@@ -36,6 +41,12 @@ import { GetActualPossessionOfAnInstrumentsCommand } from './domain/bussines/get
     UserHasBalanceForPurchaseCommand,
     SummaryCommand,
     CreateOrderCommand,
+    // Strategias de validación
+    BuyOrderValidationStrategy,
+    SellOrderValidationStrategy,
+    CashInOrderValidationStrategy,
+    CashOutOrderValidationStrategy,
+    OrderValidationContext,
 
     // Repositorios como tokens
     {
