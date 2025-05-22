@@ -2,7 +2,6 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Order } from "../entities/order.entity";
 import { MarketDataRepository } from "../repositories/market.repository";
 import { Asset } from "../entities/asset.entity";
-import { Instrument } from "../entities/instrument.entity";
 import { MarketData } from "../entities/marketdata.entity";
 import { GetBalanceAvailableToUserCommand } from "./get-balance-available-to-user.command";
 import { GetActualPossessionOfAnInstrumentsCommand } from "./get-actual-possesion.command";

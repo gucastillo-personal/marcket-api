@@ -9,6 +9,14 @@ export class InstrumentRepositoryImpl implements InstrumentRepository {
     private readonly instrumentRepo: Repository<Instrument>,
   ) {}
   
+  instrumentIsMoney(instrumentId: number): Promise<boolean> {
+    return this.instrumentRepo.createQueryBuilder('instrument')
+      .where('instrument.id = :id', { id: instrumentId })
+      .andWhere('instrument.type = :type', { type: 'MONEDA' })
+      .getCount()
+      .then(count => count > 0);
+  }
+  
   existsById(id: number): Promise<boolean> {
     return this.instrumentRepo
       .createQueryBuilder('instrument')

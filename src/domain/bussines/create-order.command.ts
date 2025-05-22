@@ -13,6 +13,7 @@ import {
   import { UserHasBalanceForPurchaseParams } from '../interfaces/user-balance-purchase.interface';
 import { MarketDataRepository } from '../repositories/market.repository';
 import { GetActualPossessionOfAnInstrumentsCommand } from './get-actual-possesion.command';
+import { GetBalanceAvailableToUserCommand } from './get-balance-available-to-user.command';
   
   @Injectable()
   export class CreateOrderCommand {
@@ -29,7 +30,9 @@ import { GetActualPossessionOfAnInstrumentsCommand } from './get-actual-possesio
   
       private readonly userHasBalanceForpPurchaseCommand: UserHasBalanceForPurchaseCommand,
 
-      private readonly getPossessionCommand: GetActualPossessionOfAnInstrumentsCommand
+      private readonly getPossessionCommand: GetActualPossessionOfAnInstrumentsCommand,
+
+      private readonly getBalaceAvailableToUserCommand: GetBalanceAvailableToUserCommand,
     ) {}
   
     async createOrder(orderParams: OrderParams): Promise<Order> {
@@ -46,13 +49,13 @@ import { GetActualPossessionOfAnInstrumentsCommand } from './get-actual-possesio
       const newOrder = new Order();
       newOrder.side = orderParams.side;
       newOrder.size = orderParams.size;
-      newOrder.price = orderParams.price;
+      newOrder.price = orderParams.price ?? 1;
       newOrder.instrumentid = orderParams.instrumentId;
       newOrder.type = orderParams.type ?? 'MARKET';
       newOrder.status = orderParams.type === 'LIMIT' ? 'NEW' : 'FILLED';
       newOrder.userid = orderParams.userId;
       
-      if (newOrder.type === 'MARKET') {
+      if (newOrder.type === 'MARKET' && newOrder.side !== 'CASH_IN' && newOrder.side !== 'CASH_OUT') {
         const marketData = await this.marketRepo.getCurrentValueIntrument(orderParams.instrumentId);
         if (marketData) {
           newOrder.setPrice(marketData.getCurrentPrice());
@@ -60,16 +63,14 @@ import { GetActualPossessionOfAnInstrumentsCommand } from './get-actual-possesio
           throw new InternalServerErrorException('Market data not found for the given instrument');
         }
       }
-      if (newOrder.side === 'CASH_IN') {
-        newOrder.setPrice(1);
-      }
+      
       return newOrder;
     }
   
     private async isValidOrder(order: OrderParams): Promise<boolean> {
-        if (order.userId <= 0) {
-            throw new BadRequestException('User UserId is required');
-        }
+      if (order.userId <= 0) {
+          throw new BadRequestException('User UserId is required');
+      }
 
       const instrumentExists = await this.instrumentRepo.existsById(order.instrumentId);
       if (order.instrumentId <= 0 || !instrumentExists) {
@@ -80,15 +81,19 @@ import { GetActualPossessionOfAnInstrumentsCommand } from './get-actual-possesio
         throw new BadRequestException('Price is required for LIMIT orders');
       }
   
-      if (order.side === 'BUY') {
+      if (order.side === 'BUY' && order.type === "MARKET") {
         return this.validateOrderBuy(order);
       }
-      if (order.side === 'SELL') {
+      if (order.side === 'SELL' && order.type === "MARKET") {
         return this.validateOrderSell(order);
       }
 
       if (order.side === 'CASH_IN') {
-        return true;
+        return this.validateOrderCashIn(order);
+      }
+
+      if (order.side === 'CASH_OUT') {
+        return this.validateOrderCashOut(order);
       }
   
       throw new BadRequestException('Invalid order side');
@@ -130,6 +135,30 @@ import { GetActualPossessionOfAnInstrumentsCommand } from './get-actual-possesio
       }
 
       return true;
+    }
+
+    private async validateOrderCashIn(order: OrderParams): Promise<boolean> {
+      const isMoney = await this.instrumentRepo.instrumentIsMoney(order.instrumentId);
+      if (!isMoney) {
+        throw new BadRequestException('Instrument is not a currency');
+      }
+      return true;
+    }
+
+    private async validateOrderCashOut(order: OrderParams): Promise<boolean> {
+      const isMoney = await this.instrumentRepo.instrumentIsMoney(order.instrumentId);
+        if (!isMoney) {
+          throw new BadRequestException('Instrument is not a currency');
+        }
+        const orders = await this.orderRepo.findByUserId(Number(order.userId));
+        const ordersFilled = orders.filter(order => order.status === 'FILLED');
+        const availableToCashOut = this.getBalaceAvailableToUserCommand.getTotalAvailableToInvest(ordersFilled);
+        
+        if (availableToCashOut <= 0 || availableToCashOut < order.size) {
+          throw new BadRequestException('User has not enough balance to cash out');
+        }
+
+        return true;
     }
   
     private isBuyToPrice(price: number | undefined): boolean {
