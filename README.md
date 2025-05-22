@@ -46,12 +46,6 @@ API de mercado construida con NestJS, que permite la gestión de órdenes de com
    DATABASE_NAME=marcket_db
    ```
 
-4. Ejecuta las migraciones (si aplican):
-
-   ```bash
-   npm run typeorm migration:run
-   ```
-
 ## 🚀 Uso
 
 Inicia la aplicación en modo desarrollo:
