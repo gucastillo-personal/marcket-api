@@ -85,7 +85,6 @@ src/
 ├── infrastructure/
 │   ├── controllers/
 │   └── services/
-├── shared/
 └── main.ts
 ```
 
@@ -99,6 +98,15 @@ src/
 ## 🧑‍💻 Autor
 
 - **Gustavo Castillo** - [GitHub](https://github.com/gucastillo-personal)
+
+## 🧑‍💻 Consideraciones
+- Se asumio que la moneda base es pesos. Ya que no se especificaba en el problema, se penso sumar una tabla de monedas para saber sus cotizaciones pero sumaban complejidad
+- Se agrego unas modificaciones en la tabla instruments agregando la extension pg_trgm para mejorar las busquedas por ILIKE
+- Se penso pero descartados por falta de tiempo:
+   -  En alguna cache en memoria para evitar consultar repetitivas a la base. 
+   -  En test de Integracion
+- Se agrego connect-neon.sh para conectarse a la base por consola.
+     
 
 ## 📄 Licencia
 
