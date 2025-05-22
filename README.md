@@ -1,4 +1,4 @@
-# 📈 marcket-api
+# 📈 market-api
 
 API de mercado construida con NestJS, que permite la gestión de órdenes de compra, venta, depósitos y retiros, así como el cálculo de posesiones y balances de usuarios.
 
